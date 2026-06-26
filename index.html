@@ -79,27 +79,28 @@ function txt(str,x,y,col='#fff',sz='bold 8px monospace'){
 
 // ── Small Mario (12×16) ──────────────────────────────────────────────────────
 // 1=#2c1800 2=#b53120 3=#f8a840 4=#3040c8
-const MP=['','#3a1408','#e02818','#fcb878','#2038d8'];
-const MSHEAD=[   // rows 0-8 shared by all small mario frames
-  '000222000000',  // hat top (3 red px)
-  '002222200000',  // hat wider
-  '022222220000',  // hat full
-  '112222211000',  // brim with dark edges
-  '003313300000',  // face: eye=1 at col4
-  '003333330000',  // face
-  '003333330000',
-  '001133100000',  // mustache
-  '000222000000',  // collar
+// palette: 1 outline 2 red 3 skin 4 blue 5 brown 6 red-dark 7 blue-dark 8 gold 9 white a skin-shadow
+const MP=['','#3a1408','#e02818','#fcc090','#2848e0','#7a3e16','#b81c10','#1a2ca0','#f8d028','#ffffff','#d89058'];
+const MSHEAD=[   // rows 0-8 shared head (finer, shaded)
+  '001222210000',  // cap crown
+  '012222221000',  // cap
+  '012666662100',  // cap shadow band
+  '122222222100',  // brim
+  '055333331000',  // hair + face
+  '053313a31000',  // eye + cheek shadow
+  '0533333a1000',  // nose
+  '051113311000',  // mustache
+  '005333310000',  // chin
 ];
-const MSBOD=['022222220000','022444220000','044444440000','044444440000']; // rows 9-12 (shirt/overalls)
+const MSBOD=['002222200000','028444820000','022444220000','094444490000']; // shoulders/bib+buttons/arms/gloves
 
 const MLEGS={
-  stand: ['004400440000','114400441000','114000041100','110000001100'],
-  walk1: ['004444000000','114440000000','114000000000','000000000000'],
-  walk2: ['000004440000','000001441000','000000041100','000000000000'],
-  walk3: ['004000040000','114000041000','000000000000','000000000000'],
-  jump:  ['024444420000','244444422000','004444400000','001441000000'],
-  die:   ['004444440000','114444441000','100000001100','000000000000'],
+  stand: ['044444400000','044004400000','155005510000','015500550000'],
+  walk1: ['044444400000','044044000000','155440000000','015500000000'],
+  walk2: ['044444400000','000440440000','000015510000','000001550000'],
+  walk3: ['044444400000','044440400000','055055000000','155005000000'],
+  jump:  ['024444420000','244444422000','005445500000','155005510000'],
+  die:   ['044444400000','144444410000','100000010000','000000000000'],
 };
 function mspr(leg){ return { pal:MP, px:[...MSHEAD,...MSBOD,...MLEGS[leg]] }; }
 const SPR={
@@ -107,41 +108,46 @@ const SPR={
   msJ:mspr('jump'),  msD:mspr('die'),
 };
 
-// ── Super Mario (16×24) ──────────────────────────────────────────────────────
-const MBPX=[
-  '0002222000000000',  //  0 hat
-  '0022222200000000',  //  1
-  '0122222210000000',  //  2 brim
-  '0003313300000000',  //  3 face: eye at col4
-  '0033333330000000',  //  4
-  '0033333330000000',  //  5
-  '0033333330000000',  //  6
-  '0011333110000000',  //  7 mustache
-  '0001333100000000',  //  8 chin
-  '0002222200000000',  //  9 collar
-  '0222222222000000',  // 10 shirt
-  '0222222222000000',  // 11
-  '0224444222000000',  // 12 suspenders (4=blue)
-  '0244444422000000',  // 13 overalls
-  '0244444422000000',  // 14
-  '0444444444000000',  // 15
-  '0444444444000000',  // 16
-  '0444444444000000',  // 17
-  '0044440044000000',  // 18 legs
-  '0144440044100000',  // 19
-  '1144400044110000',  // 20 shoes
-  '1100000001100000',  // 21 soles
-  '0000000000000000',  // 22
-  '0000000000000000',  // 23
+// ── Big hero (16×24) — original finer design with shading ────────────────────
+const MBTOP=[ // rows 0-18: head + torso, shared across frames
+  '0000122210000000',  //  0 cap crown
+  '0001222222100000',  //  1 cap
+  '0012222222210000',  //  2 cap
+  '0126666666621000',  //  3 cap shadow band
+  '1222222222222100',  //  4 brim
+  '0055333333aa1000',  //  5 hair + face + cheek shadow
+  '0053113333a31000',  //  6 brow
+  '0053913333a31000',  //  7 eye (white + pupil)
+  '0053333a3aa31000',  //  8 nose
+  '0051111313310000',  //  9 mustache
+  '0005133333100000',  // 10 chin
+  '0002223332200000',  // 11 collar (red + skin neck)
+  '0022222222220000',  // 12 shirt
+  '0222222222222000',  // 13 shirt
+  '0228444448220000',  // 14 bib + gold buttons
+  '0244444444442000',  // 15 overalls
+  '0244478844420000',  // 16 button/fold detail
+  '0244444444442000',  // 17 overalls
+  '9244444444429000',  // 18 white gloves + overalls
 ];
-const MBW1=[...MBPX.slice(0,18),'0044444000000000','0144440000000000','1144000000000000','1100000000000000','0000000000000000','0000000000000000'];
-const MBW2=[...MBPX.slice(0,18),'0000044440000000','0000001441000000','0000000041110000','0000000000000000','0000000000000000','0000000000000000'];
-const MBJP=[...MBPX.slice(0,12),'2244444422000000','2444444422000000','4444444444000000','4444444444000000','0044444000000000','0001441000000000','1100000000000000','0000000000000000','0000000000000000','0000000000000000','0000000000000000','0000000000000000'];
+const MBPX=[...MBTOP,
+  '0044444444440000',  // 19 hips
+  '0044440044400000',  // 20 legs split
+  '0044400044400000',  // 21 legs
+  '0155500155510000',  // 22 shoes (brown + dark heel)
+  '0115500115510000',  // 23 soles
+];
+const MBW1=[...MBTOP,
+  '0044444444440000','0044444844400000','0001555044400000','0001155015500000','0000110001100000'];
+const MBW2=[...MBTOP,
+  '0044444444440000','0004448444440000','0004440555100000','0055100115100000','0011000010000000'];
+const MBJP=[...MBTOP,
+  '0944444444490000','0044440044400000','0155500015500000','0011000001100000','0000000000000000'];
 const MBCR=[
-  '0000000000000000','0002222000000000','0022222200000000','0122222210000000',
-  '0003313300000000','0033333330000000','0011333110000000','0222222222000000',
-  '0224444222000000','0244444422000000','0444444444000000','0044440044000000',
-  '0144440044100000','1144000001100000',
+  '0000000000000000','0000122210000000','0001222221000000','0012666621000000',
+  '0122222221000000','0055333a31000000','0053913a31000000','0051113310000000',
+  '0022233322000000','0228444482200000','0244444444200000','0944444444900000',
+  '0044400444000000','0155500155100000',
   ...Array(10).fill('0000000000000000'),
 ];
 Object.assign(SPR,{
@@ -1798,21 +1804,48 @@ function drawBgHill(cx,baseY,w,h,col,colL){
   ctx.beginPath(); ctx.arc(cx-r*0.3,baseY-h+r,r*0.5,Math.PI,0); ctx.fill();
 }
 
-// Decorative red-cap mushroom prop on the grass
+// Decorative red-cap mushroom prop on the grass (bigger, rounded, glossy)
 function drawDecoMush(x,y){
-  ctx.fillStyle='#9c4030'; ctx.fillRect(x+5,y+6,4,5);       // stem shadow
-  ctx.fillStyle='#f8e0c0'; ctx.fillRect(x+4,y+6,4,5);       // stem
-  ctx.fillStyle='#e02828'; ctx.beginPath(); ctx.arc(x+6,y+5,7,Math.PI,0); ctx.fill(); // cap
-  ctx.fillRect(x-1,y+4,14,2);
-  ctx.fillStyle='#f8f8f8'; ctx.fillRect(x+2,y+1,2,2); ctx.fillRect(x+8,y+2,3,2); // spots
+  // soft shadow
+  ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.beginPath(); ctx.ellipse(x+8,y+18,8,2,0,0,Math.PI*2); ctx.fill();
+  // stem
+  ctx.fillStyle='#caa070'; ctx.fillRect(x+5,y+9,7,9);
+  ctx.fillStyle='#f4e6c8'; ctx.fillRect(x+5,y+9,4,9);
+  ctx.fillStyle='#7a5838'; ctx.fillRect(x+11,y+9,1,9);
+  // cap (dome)
+  ctx.fillStyle='#c81818'; ctx.beginPath(); ctx.arc(x+8,y+8,9,Math.PI,0); ctx.fill();
+  ctx.fillRect(x-1,y+7,18,3);
+  ctx.fillStyle='#f03030'; ctx.beginPath(); ctx.arc(x+8,y+8,9,Math.PI,Math.PI*1.55); ctx.fill(); // lit side
+  // white spots + rim shade
+  ctx.fillStyle='#fff6f0'; ctx.beginPath(); ctx.arc(x+5,y+5,2.4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+11,y+6,2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#8c0e0e'; ctx.fillRect(x-1,y+9,18,1);
 }
 
-// Tiny flower cluster
+// Flower with rounded petals (bigger, prettier)
 function drawFlower(x,y,col){
-  ctx.fillStyle='#1c9c1c'; ctx.fillRect(x+2,y+4,1,4); // stem
-  ctx.fillStyle=col;
-  ctx.fillRect(x+1,y+2,3,1); ctx.fillRect(x,y+3,5,1); ctx.fillRect(x+1,y+4,3,1);
-  ctx.fillStyle='#f8e840'; ctx.fillRect(x+2,y+3,1,1); // center
+  ctx.fillStyle='#1c9c1c'; ctx.fillRect(x+3,y+5,2,7);            // stem
+  ctx.fillStyle='#2cc02c'; ctx.fillRect(x+1,y+8,3,2);            // leaf
+  ctx.fillStyle=col;                                            // 4 petals
+  ctx.beginPath(); ctx.arc(x+4,y+1,2.4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+1,y+4,2.4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+7,y+4,2.4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+4,y+7,2.4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f8e040'; ctx.beginPath(); ctx.arc(x+4,y+4,2,0,Math.PI*2); ctx.fill(); // center
+}
+
+// Wooden picket fence segment (one post pair, ~32px wide)
+function drawFence(x,y){
+  const post=(px)=>{
+    ctx.fillStyle='#7a4a20'; ctx.fillRect(px,y-2,5,16);          // body
+    ctx.fillStyle='#9c6432'; ctx.fillRect(px,y-2,2,16);          // lit edge
+    ctx.fillStyle='#5a3414'; ctx.fillRect(px+4,y-2,1,16);        // shade edge
+    ctx.fillStyle='#7a4a20'; ctx.beginPath(); ctx.moveTo(px-1,y-2); ctx.lineTo(px+2.5,y-6); ctx.lineTo(px+6,y-2); ctx.closePath(); ctx.fill(); // pointed top
+  };
+  post(x); post(x+22);
+  // horizontal rails
+  ctx.fillStyle='#8a5626'; ctx.fillRect(x-2,y+1,30,3); ctx.fillRect(x-2,y+8,30,3);
+  ctx.fillStyle='#5a3414'; ctx.fillRect(x-2,y+3,30,1); ctx.fillRect(x-2,y+10,30,1);
 }
 
 function drawWater(){
@@ -1883,18 +1916,21 @@ function drawScenery(cx){
 // Foreground grass decorations — drawn after tiles, only on surface tiles
 function drawGrassDeco(cx){
   if(gS.lv===2||gS.lv===4) return;
-  const fcol=['#f868a8','#f8a838','#a868f8','#f85858'];
+  const fcol=['#f868a8','#f8a838','#a868f8','#f85858','#58c8f8'];
   const c0=Math.max(0,Math.floor(cx/TILE)), c1=c0+17;
   for(let c=c0;c<=c1;c++){
-    // place a prop on a surface tile based on a deterministic hash
-    if(!solid(tilemap.get(c,tilemapSurfaceRow(c))) ) continue;
     const r=tilemapSurfaceRow(c);
-    if(r<0) continue;
-    const h=(c*2654435761)>>>0; // cheap hash
+    if(r<0||r>12) continue; // only on real ground, not floating bricks high up
+    const h=(c*2654435761)>>>0; // cheap deterministic hash
     const sx=c*TILE-cx, sy=r*TILE;
-    if(h%17===0) drawDecoMush(sx+1,sy-12);
-    else if(h%11===0) drawFlower(sx+5,sy-8,fcol[h%4]);
-    else if(h%23===0) drawBush(sx-8,sy-26);
+    const m=h%9;
+    if(m===0) drawFence(sx,sy-14);
+    else if(m===1) drawDecoMush(sx,sy-18);
+    else if(m===2||m===5) drawFlower(sx+4,sy-10,fcol[h%5]);
+    else if(m===3) drawBush(sx-6,sy-28);
+    else if(m===6){ drawFlower(sx+1,sy-9,fcol[h%5]); drawFlower(sx+9,sy-9,fcol[(h>>3)%5]); } // pair
+    // grass tufts on many tiles
+    if(m===4||m===7){ ctx.fillStyle='#2cc02c'; ctx.fillRect(sx+5,sy-3,1,3); ctx.fillRect(sx+7,sy-4,1,4); ctx.fillRect(sx+9,sy-3,1,3); }
   }
 }
 // Find the topmost solid (surface) row of a column, or -1
@@ -2054,13 +2090,13 @@ function render(){
   drawGrassDeco(cx);
   drawFlag(cx);
   drawObjs(cx); drawFBs(cx); drawPlants(cx); drawFirebars(cx);
-  for(const e of enemies){ if(e.alive&&e.onGnd!==false) groundShadow(e.x-cx+e.w/2,e.y+e.h+1,e.w); }
+  for(const e of enemies){ if(e.alive&&!(e instanceof CheepCheep)) groundShadow(e.x-cx+e.w/2,e.y+e.h+1,e.w); }
   for(const e of enemies) e.draw(cx);
   // Bowser & axe (level 4)
   if(bowser&&bowser.alive) bowser.draw(cx);
   if(axeActive){ const as=axeX-cx; spr(SPR.axe,as,axeY); ctx.fillStyle='#f8d000'; ctx.fillRect(as+3,axeY-8,2,8); } // axe on a chain
   drawParts(cx);
-  if(!mario.dead&&!mario.pole) groundShadow(mario.x-cx+mario.w/2,mario.y+mario.h+1,mario.w+2);
+  if(!mario.dead&&!mario.pole&&mario.onGnd) groundShadow(mario.x-cx+mario.w/2,mario.y+mario.h+1,mario.w+2);
   mario.draw(cx);
   drawHUD();
   if(gS.phase==='CLEAR') drawClear();
