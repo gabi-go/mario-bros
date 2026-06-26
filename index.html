@@ -1280,7 +1280,7 @@ class Mario{
   }
 
   _dead(gs){ if(this.dT===0){ this.dVy=-6; } this.dT++; this.dVy+=0.25; this.y+=this.dVy; if(this.dT>180) gs._endDeath(); }
-  _pole(tm,gs){ this.y+=this.pVy; this.pVy=Math.min(this.pVy+0.12,3.5); if(this.y>=13*TILE-this.h){ this.y=13*TILE-this.h; this.pole=false; this.onGnd=true; gs.levelClear(); } }
+  _pole(tm,gs){ this.y+=this.pVy; this.pVy=Math.min(this.pVy+0.12,3.5); let gr=tm.h; for(let r=0;r<tm.h;r++){ if(solid(tm.get(gs.poleCol||200,r))){ gr=r; break; } } const land=gr*TILE-this.h; if(this.y>=land){ this.y=land; this.pole=false; this.onGnd=true; gs.levelClear(); } }
 
   _moveX(tm){
     this.x+=this.vx;
@@ -1365,7 +1365,7 @@ class Camera{ constructor(){ this.x=0; } follow(m,lw){ const t=m.x-NW*0.4; this.
 
 // ─── MUSIC ENGINE (SMB1 Overworld Theme) ─────────────────────────────────────
 class Music{
-  constructor(){ this.ac=null; this.muted=false; this.playing=false; this.noteIdx=0; this.noteTimer=0; this.src=null; document.addEventListener('keydown',()=>this._init(),{once:true}); }
+  constructor(){ this.ac=null; this.muted=false; this.paused=false; this.playing=false; this.noteIdx=0; this.noteTimer=0; this.src=null; document.addEventListener('keydown',()=>this._init(),{once:true}); }
   _init(){
     if(this.ac) return;
     this.ac=new(window.AudioContext||window.webkitAudioContext)();
@@ -1406,7 +1406,7 @@ class Music{
     [880,4],[1047,4],[1319,4],[880,4],[1047,4],[1319,4],
   ];
   tick(){
-    if(!this.playing||this.muted) return;
+    if(!this.playing||this.muted||this.paused) return;
     let theme;
     if(typeof gS!=='undefined'&&gS.mario&&gS.mario.invT>0) theme=Music.THEME_STAR;
     else theme=typeof gS!=='undefined'&&(gS.lv===2||gS.lv===4)?Music.THEME2:Music.THEME;
@@ -1466,7 +1466,7 @@ const gS={
   mario:null,
   snd(n){ sfx.play(n); },
   addScore(n){ this.score+=n; if(this.score>this.hiScore){ this.hiScore=this.score; localStorage.setItem('mhs',this.hiScore); } },
-  addCoins(n){ this.coins++; this.score+=200; if(this.coins>=100){ this.coins=0; this.lives++; sfx.play('1up'); } },
+  addCoins(n){ this.coins+=n; this.score+=200*n; while(this.coins>=100){ this.coins-=100; this.lives++; sfx.play('1up'); } },
   levelClear(){
     this.phase='CLEAR';
     this._nextLv=this.lv<4?this.lv+1:1;
@@ -1492,7 +1492,7 @@ const gS={
     if(this.phase==='MENU'||this.phase==='MENU_LV'||this.phase==='MENU_SKIN'||this.phase==='MENU_SCORES') return;
     if(this.phase==='INTRO'){ if(--this._iT<=0){ this.phase='PLAY'; music.start(); } return; }
     if(this.phase==='DEAD'){ mario.update(tilemap,this); return; }
-    if(this.phase==='GAMEOVER'){ if(--this._goT<=0) this._newGame(); return; }
+    if(this.phase==='GAMEOVER'){ return; }
     if(this.phase==='CLEAR'){
       // Victory dance — Mario faces forward and hops joyfully in place
       mario.fR=true;
@@ -1584,6 +1584,7 @@ const gS={
           mario.airCombo=(mario.airCombo||0)+1;
           if(mario.airCombo>=2){ const bonus=Math.min(mario.airCombo,8)*100; this.addScore(bonus); addScore(e.x,e.y-12,'COMBO ×'+mario.airCombo,true); addSpark(e.x+e.w/2,e.y,'#f8e840'); }
         }
+        else if(e instanceof Koopa&&e.sh&&!e.shSlide){ e.stomp(this); }
         else mario.hit(this);
       }
     }
@@ -2070,6 +2071,8 @@ function render(){
   if(gS.phase==='MENU_LV'){ drawLvSelect(); return; }
   if(gS.phase==='MENU_SKIN'){ drawSkinSelect(); return; }
   if(gS.phase==='MENU_SCORES'){ drawScores(); return; }
+  if(gS.phase==='INTRO'){ drawIntro(); return; }
+  if(gS.phase==='GAMEOVER'){ drawGameOver(); return; }
 
   // Sky: soft vertical gradient (top→horizon) for a modern look
   const skyGrad={ // [topColor, bottomColor] per level
@@ -2081,9 +2084,6 @@ function render(){
   const grd=ctx.createLinearGradient(0,0,0,NH);
   grd.addColorStop(0,gc[0]); grd.addColorStop(1,gc[1]);
   ctx.fillStyle=grd; ctx.fillRect(0,0,NW,NH);
-
-  if(gS.phase==='INTRO'){ drawIntro(); return; }
-  if(gS.phase==='GAMEOVER'){ drawGameOver(); return; }
 
   drawScenery(cx);
   tilemap.draw(cx);
@@ -2125,8 +2125,8 @@ if(ld.firebars)   ld.firebars.forEach(f=>firebars.push(new Firebar(f.cx*TILE+8,f
 // M = mute / P = pause / menu navigation
 document.addEventListener('keydown',e=>{
   if(e.code==='KeyM'){ sfx.muted=!sfx.muted; music.muted=!music.muted; }
-  if((e.code==='KeyP'||e.code==='Escape')&&gS.phase==='PLAY')  { gS.phase='PAUSE'; music.muted=true; }
-  else if((e.code==='KeyP'||e.code==='Escape')&&gS.phase==='PAUSE'){ gS.phase='PLAY'; music.muted=sfx.muted; }
+  if((e.code==='KeyP'||e.code==='Escape')&&gS.phase==='PLAY')  { gS.phase='PAUSE'; music.paused=true; }
+  else if((e.code==='KeyP'||e.code==='Escape')&&gS.phase==='PAUSE'){ gS.phase='PLAY'; music.paused=false; }
 
   // GAMEOVER navigation
   if(e.code==='Escape'&&gS.phase==='GAMEOVER') gS.phase='MENU';
@@ -2183,8 +2183,8 @@ document.addEventListener('keydown',e=>{
   const pb=document.getElementById('tc-pause');
   if(pb) pb.addEventListener('touchstart',e=>{ e.preventDefault();
     music._init&&music._init(); sfx._init&&sfx._init();
-    if(gS.phase==='PLAY'){ gS.phase='PAUSE'; music.muted=true; }
-    else if(gS.phase==='PAUSE'){ gS.phase='PLAY'; music.muted=sfx.muted; }
+    if(gS.phase==='PLAY'){ gS.phase='PAUSE'; music.paused=true; }
+    else if(gS.phase==='PAUSE'){ gS.phase='PLAY'; music.paused=false; }
     else if(gS.phase==='MENU'){ sfx.play('select'); if(menuCursor===0) gS._newGame(); else if(menuCursor===1){ gS.phase='MENU_LV'; menuSubCursor=0; } else if(menuCursor===2){ gS.phase='MENU_SKIN'; menuSubCursor=playerSkin==='luigi'?1:0; } else gS.phase='MENU_SCORES'; }
   },{passive:false});
 })();
